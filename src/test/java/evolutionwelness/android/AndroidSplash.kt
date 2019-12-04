@@ -1,33 +1,27 @@
 package evolutionwelness.android
 
-import evolutionwelness.AppiumTest
-import io.appium.java_client.MobileBy
-import io.appium.java_client.android.Activity
 import io.appium.java_client.android.AndroidDriver
 import org.junit.After
-import org.junit.AfterClass
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.openqa.selenium.By
-import org.openqa.selenium.WebElement
-import org.openqa.selenium.support.ui.ExpectedConditions
-import org.openqa.selenium.support.ui.WebDriverWait
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 
-class AndroidSplash : AppiumTest() {
+class AndroidSplash : AndroidTestBase() {
 
     @Before
     fun setUp() {
-        driver = AndroidDriver(serviceUrl(), capabilities())
-//        driver.startActivity("SplashActivity")
+        driver = AndroidDriver(serviceUrl(), capabilities().apply {
+            setCapability("appActivity", SPLASH_ACTIVITY)
+        })
     }
 
     @After
-    fun after() {
-        driver.removeApp(PACKAGE)
+    fun tearDown() {
+        driver.quit()
     }
 
     @Test
@@ -45,9 +39,9 @@ class AndroidSplash : AppiumTest() {
     }
 
     @Test
-    fun `Given user login, when go to the Daily Pass checkout screen, then navigate correctly`() {
+    fun `Given user has login, when go to the Daily Pass checkout screen, then navigate correctly`() {
         // given
-//        login()
+        login()
 
         // when
         goToDailyPassCheckout()
@@ -90,7 +84,7 @@ class AndroidSplash : AppiumTest() {
         waitFor(clubListId)
 
         val clubNameListId = "com.evolutionwellness.app.fitnessfirst.debug:id/clubName"
-        val clubNameList = clubList.findElements<WebElement>(By.id(clubNameListId))
+        val clubNameList = clubList.findElements(By.id(clubNameListId))
         clubNameList.first().click()
 
         // Click the Daily Pass ticket
@@ -120,38 +114,8 @@ class AndroidSplash : AppiumTest() {
         driver.findElement(byContentDescription(dateAfter2Days.format(DateTimeFormatter.ofPattern("dd MMMM yyyy")))).click()
     }
 
-    private fun waitFor(id: String) {
-        WebDriverWait(driver, 20).until(ExpectedConditions.visibilityOfElementLocated(By.id(id)))
-    }
-
-    private fun waitFor(id: String, timeoutSecs: Long) {
-        WebDriverWait(driver, timeoutSecs).until(ExpectedConditions.visibilityOfElementLocated(By.id(id)))
-    }
-
-    fun byText(text: String): By? {
-        val command = "new UiSelector().text(\"$text\")"
-        return MobileBy.AndroidUIAutomator(command);
-    }
-
-    fun byContentDescription(text: String): By? {
-        val command = "new UiSelector().description(\"$text\")"
-        return MobileBy.AndroidUIAutomator(command);
-    }
-
-
-    fun AndroidDriver<WebElement>.startActivity(activity: String) {
-        startActivity(Activity(PACKAGE, "$ACTIVITY.$activity"))
-    }
-
     companion object {
-        private val ACTIVITY = "com.evolutionwellness.app.controller.activity"
-        private lateinit var driver: AndroidDriver<WebElement>
-
-        @AfterClass
-        @JvmStatic
-        fun tearDown() {
-            driver.quit()
-        }
+        private const val SPLASH_ACTIVITY = "$ACTIVITY.SplashActivity"
     }
 }
 
